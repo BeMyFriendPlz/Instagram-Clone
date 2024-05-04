@@ -2,6 +2,7 @@ package com.example.instagram_clone;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -30,6 +31,21 @@ public class StartActivity extends AppCompatActivity {
         animation.setFillAfter(false);
         animation.setAnimationListener(new MyAnimationListener());
         iconImage.setAnimation(animation);
+
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Xóa Activity trước đó và đưa Activity mới lên đầu
+                startActivity(new Intent(StartActivity.this, RegisterActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            }
+        });
+
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(StartActivity.this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            }
+        });
     }
 
     private class MyAnimationListener implements Animation.AnimationListener {
