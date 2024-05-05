@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class StartActivity extends AppCompatActivity {
     private ImageView iconImage;
     private LinearLayout linearLayout;
@@ -74,5 +76,15 @@ public class StartActivity extends AppCompatActivity {
         linearLayout = findViewById(R.id.linear_layout);
         login = findViewById(R.id.login);
         register = findViewById(R.id.register);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Không cần đăng nhập lại mỗi lần vào app
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            startActivity(new Intent(StartActivity.this, MainActivity.class));
+            finish();
+        }
     }
 }
