@@ -42,6 +42,9 @@ dependencies {
     implementation "com.hendraanggrian.appcompat:socialview-autocomplete:0.1"
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
 
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.squareup.picasso:picasso:2.8'
+
     implementation platform('com.google.firebase:firebase-bom:32.8.1')
     implementation 'com.google.firebase:firebase-auth:23.0.0'
     implementation 'com.google.firebase:firebase-database:21.0.0'
