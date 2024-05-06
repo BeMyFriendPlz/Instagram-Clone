@@ -59,7 +59,12 @@ public class PostActivity extends AppCompatActivity {
             }
         });
 
-        CropImage.activity().start(PostActivity.this);
+        image_added.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CropImage.activity().start(PostActivity.this);
+            }
+        });
     }
 
     private void upload() {
@@ -136,10 +141,6 @@ public class PostActivity extends AppCompatActivity {
             imageUri = result.getUri();
 
             image_added.setImageURI(imageUri);
-        } else {
-            Toast.makeText(this, "Try again!", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(PostActivity.this, MainActivity.class));
-            finish();
         }
     }
 
