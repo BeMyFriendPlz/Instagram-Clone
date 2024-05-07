@@ -54,7 +54,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+        // Lấy dữ liệu từ CommentAdapter
+        Bundle intent = getIntent().getExtras();
+        if (intent != null) {
+            String profileId = intent.getString("publisherId");
+            // Lưu trữ dữ liệu để truyền đến ProfileFragment
+            getSharedPreferences("PROFILE", MODE_PRIVATE).edit().putString("profileId", profileId).apply();
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ProfileFragment()).commit();
+            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+        } else {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+        }
+
     }
 
     private void initView() {
