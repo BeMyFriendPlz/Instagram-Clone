@@ -149,6 +149,8 @@ public class PostActivity extends AppCompatActivity {
             imageUri = result.getUri();
 
             image_added.setImageURI(imageUri);
+        } else {
+            Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
         }
     }
 

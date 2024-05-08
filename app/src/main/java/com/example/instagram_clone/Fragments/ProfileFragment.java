@@ -1,10 +1,13 @@
 package com.example.instagram_clone.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +17,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.instagram_clone.Adapter.PhotoAdapter;
+import com.example.instagram_clone.Adapter.PostAdapter;
+import com.example.instagram_clone.EditProfileActivity;
 import com.example.instagram_clone.Model.Post;
 import com.example.instagram_clone.Model.User;
 import com.example.instagram_clone.R;
@@ -26,9 +32,20 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileFragment extends Fragment {
+    private RecyclerView recyclerViewSaves;
+    private PhotoAdapter postAdapterSaves;
+    private List<Post> mySavePosts;
+    private RecyclerView recyclerView;
+    private PhotoAdapter photoAdapter;
+    private List<Post> myPhotoList;
     private CircleImageView imageProfile;
     private ImageView options;
     private ImageButton myPictures, savedPictures;
@@ -64,9 +81,25 @@ public class ProfileFragment extends Fragment {
         savedPictures = view.findViewById(R.id.saved_pictures);
         editProfile = view.findViewById(R.id.edit_profile);
 
+        recyclerView = view.findViewById(R.id.recycle_view_pictures);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        myPhotoList = new ArrayList<>();
+        photoAdapter = new PhotoAdapter(getContext(), myPhotoList);
+        recyclerView.setAdapter(photoAdapter);
+
+        recyclerViewSaves = view.findViewById(R.id.recycle_view_saved);
+        recyclerViewSaves.setHasFixedSize(true);
+        recyclerViewSaves.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        mySavePosts = new ArrayList<>();
+        postAdapterSaves = new PhotoAdapter(getContext(), mySavePosts);
+        recyclerViewSaves.setAdapter(postAdapterSaves);
+
         userInfo();
         getFollowersAndFollowingCount();
         getPostCount();
+        myPhotos();
+        mySavePhotos();
 
         // Kiểm tra xem có phải profile của mình không
         if (profileId.equals(fUser.getUid())) {
@@ -80,7 +113,7 @@ public class ProfileFragment extends Fragment {
             public void onClick(View view) {
                 String btnText = editProfile.getText().toString();
                 if (btnText.equals("Edit profile")) {
-                    // GOTO edit activity
+                    startActivity(new Intent(getContext(), EditProfileActivity.class));
                 } else if (btnText.equals("follow")) {
                     FirebaseDatabase.getInstance().getReference().child("Follow")
                             .child(fUser.getUid()).child("following").child(profileId).setValue(true);
@@ -95,7 +128,99 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerViewSaves.setVisibility(View.GONE);
+
+        myPictures.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerView.setVisibility(View.VISIBLE);
+                recyclerViewSaves.setVisibility(View.GONE);
+            }
+        });
+
+        savedPictures.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerView.setVisibility(View.GONE);
+                recyclerViewSaves.setVisibility(View.VISIBLE);
+            }
+        });
+
         return view;
+    }
+
+    private void mySavePhotos() {
+        List<String> saveIds = new ArrayList<>();
+
+        FirebaseDatabase.getInstance().getReference().child("Saves").child(fUser.getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            saveIds.add(dataSnapshot.getKey());
+                        }
+
+                        FirebaseDatabase.getInstance().getReference().child("Posts")
+                                .addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        mySavePosts.clear();
+
+                                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                            Post post = dataSnapshot.getValue(Post.class);
+
+                                            for (String id : saveIds) {
+                                                if (post.getPostid().equals(id)) {
+                                                    mySavePosts.add(post);
+                                                }
+                                            }
+                                        }
+
+                                        // Đảo ngược List để lấy post mới nhất
+                                        Collections.reverse(mySavePosts);
+                                        postAdapterSaves.notifyDataSetChanged();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void myPhotos() {
+        FirebaseDatabase.getInstance().getReference().child("Posts")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        myPhotoList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Post post = dataSnapshot.getValue(Post.class);
+
+                            // Kiểm tra xem post có phải của user không
+                            if (post.getPublisher().equals(fUser.getUid())) {
+                                myPhotoList.add(post);
+                            }
+                        }
+
+                        // Đảo ngược List để lấy post mới nhất
+                        Collections.reverse(myPhotoList);
+                        photoAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     private void checkFollowingStatus() {
@@ -192,5 +317,11 @@ public class ProfileFragment extends Fragment {
 
                     }
                 });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getContext().getSharedPreferences("PROFILE", Context.MODE_PRIVATE).edit().clear().apply();
     }
 }
