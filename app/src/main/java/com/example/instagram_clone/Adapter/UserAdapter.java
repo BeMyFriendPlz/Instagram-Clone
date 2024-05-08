@@ -1,6 +1,7 @@
 package com.example.instagram_clone.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.instagram_clone.Fragments.ProfileFragment;
+import com.example.instagram_clone.MainActivity;
 import com.example.instagram_clone.Model.User;
 import com.example.instagram_clone.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,20 +75,37 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 if (holder.btnFollow.getText().toString().equals("follow")) {
                     FirebaseDatabase.getInstance().getReference().child("Follow").child(firebaseUser.getUid())
                             .child("following").child(user.getId()).setValue(true);
-                    
+
                     FirebaseDatabase.getInstance().getReference().child("Follow").child(user.getId())
                             .child("followers").child(firebaseUser.getUid()).setValue(true);
-                    
+
                     addNotification(user.getId());
                 } else {
                     FirebaseDatabase.getInstance().getReference().child("Follow").child(firebaseUser.getUid())
                             .child("following").child(user.getId()).removeValue();
-                    
+
                     FirebaseDatabase.getInstance().getReference().child("Follow").child(user.getId())
                             .child("followers").child(firebaseUser.getUid()).removeValue();
                 }
             }
         });
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isFragment) {
+                    mContext.getSharedPreferences("PROFILE", Context.MODE_PRIVATE).edit()
+                            .putString("profileId", user.getId()).apply();
+                    ((FragmentActivity) mContext).getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new ProfileFragment()).commit();
+                } else {
+                    Intent intent = new Intent(mContext, MainActivity.class);
+                    intent.putExtra("publisherId", user.getId());
+                    mContext.startActivity(intent);
+                }
+            }
+        });
+
     }
 
     private void addNotification(String userId) {

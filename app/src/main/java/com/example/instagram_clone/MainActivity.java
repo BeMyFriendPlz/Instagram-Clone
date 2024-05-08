@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Lấy dữ liệu từ CommentAdapter
+        // Lấy dữ liệu từ các Adapter
         Bundle intent = getIntent().getExtras();
         if (intent != null) {
             String profileId = intent.getString("publisherId");

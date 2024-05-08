@@ -20,8 +20,10 @@ import android.widget.TextView;
 import com.example.instagram_clone.Adapter.PhotoAdapter;
 import com.example.instagram_clone.Adapter.PostAdapter;
 import com.example.instagram_clone.EditProfileActivity;
+import com.example.instagram_clone.FollowersActivity;
 import com.example.instagram_clone.Model.Post;
 import com.example.instagram_clone.Model.User;
+import com.example.instagram_clone.OptionsActivity;
 import com.example.instagram_clone.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -67,6 +69,7 @@ public class ProfileFragment extends Fragment {
             profileId = fUser.getUid();
         } else {
             profileId = data;
+            getContext().getSharedPreferences("PROFILE", Context.MODE_PRIVATE).edit().clear().apply();
         }
 
         imageProfile = view.findViewById(R.id.image_profile);
@@ -144,6 +147,33 @@ public class ProfileFragment extends Fragment {
             public void onClick(View view) {
                 recyclerView.setVisibility(View.GONE);
                 recyclerViewSaves.setVisibility(View.VISIBLE);
+            }
+        });
+
+        followers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), FollowersActivity.class);
+                intent.putExtra("id", profileId);
+                intent.putExtra("tittle", "followers");
+                startActivity(intent);
+            }
+        });
+
+        following.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), FollowersActivity.class);
+                intent.putExtra("id", profileId);
+                intent.putExtra("tittle", "following");
+                startActivity(intent);
+            }
+        });
+
+        options.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getContext(), OptionsActivity.class));
             }
         });
 
@@ -317,11 +347,5 @@ public class ProfileFragment extends Fragment {
 
                     }
                 });
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getContext().getSharedPreferences("PROFILE", Context.MODE_PRIVATE).edit().clear().apply();
     }
 }

@@ -36,6 +36,7 @@ public class PostDetailFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_post_detail, container, false);
 
         postId = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE).getString("postid", "none");
+        getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit().clear().apply();
 
         recyclerView = view.findViewById(R.id.recycle_view);
         recyclerView.setHasFixedSize(true);
@@ -62,11 +63,5 @@ public class PostDetailFragment extends Fragment {
                 });
 
         return view;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit().clear().apply();
     }
 }
